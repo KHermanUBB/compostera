@@ -1267,3 +1267,6 @@ build/esp-idf/xtensa/CMakeFiles/__idf_xtensa.dir/xtensa_intr_asm.S.obj
 build/esp-idf/xtensa/CMakeFiles/__idf_xtensa.dir/xtensa_intr.c.obj
 build/esp-idf/xtensa/CMakeFiles/__idf_xtensa.dir/esp32/trax_init.c.obj
 build/partition_table/partition-table.bin
+build/esp-idf/main/CMakeFiles/__idf_main.dir/balance.c.obj
+build/esp-idf/main/CMakeFiles/__idf_main.dir/keypad.c.obj
+build/esp-idf/main/CMakeFiles/__idf_main.dir/lcd.c.obj
