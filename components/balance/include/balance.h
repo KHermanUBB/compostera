@@ -11,6 +11,8 @@
 #define BALANCE_H
 
 
+void pb(void);
+
 #endif /* BALANCE_H */
 
 /*** end of file ***/

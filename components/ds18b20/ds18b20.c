@@ -296,15 +296,17 @@ float ds18b20_get_temp(void) {
       check=ds18b20_RST_PULSE();
       if(check==1)
       {
+        printf("communication succesfull\n");
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0x44);
-        vTaskDelay(750 / portTICK_RATE_MS);
+        vTaskDelay(850 / portTICK_RATE_MS);
         check=ds18b20_RST_PULSE();
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0xBE);
         temp1=ds18b20_read_byte();
         temp2=ds18b20_read_byte();
         check=ds18b20_RST_PULSE();
+        printf("temp1 = %d and temp2 = %d, check = %d\n", temp1, temp2, check);
         float temp=0;
         temp=(float)(temp1+(temp2*256))/16;
         return temp;
@@ -318,6 +320,7 @@ float ds18b20_get_temp(void) {
 void ds18b20_init(int GPIO) {
 	DS_GPIO = GPIO;
 	gpio_pad_select_gpio(DS_GPIO);
+  gpio_pullup_en(DS_GPIO);
 	init = 1;
 }
 

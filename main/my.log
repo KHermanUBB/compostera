@@ -1,0 +1,17 @@
+-- The C compiler identification is GNU 7.5.0
+-- The CXX compiler identification is GNU 7.5.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring incomplete, errors occurred!
+See also "/home/icarosix/Documents/PlatformIO/Projects/Compostera/main/build/CMakeFiles/CMakeOutput.log".
+Executing action: all (aliases: build)
+Running cmake in directory /home/icarosix/Documents/PlatformIO/Projects/Compostera/main/build
+Executing "cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DESP_PLATFORM=1 -DCCACHE_ENABLE=0 /home/icarosix/Documents/PlatformIO/Projects/Compostera/main"...
