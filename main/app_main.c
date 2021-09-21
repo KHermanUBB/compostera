@@ -6,7 +6,7 @@
 #include "nvs_flash.h"
 #include  "ds18b20.h"
 #include "balance.h"//Include library
-const int DS_PIN = 13; //GPIO where you connected ds18b20
+const int DS_PIN = 22; //GPIO where you connected ds18b20
 
 void mainTask(void *pvParameters){
   ds18b20_init(DS_PIN);
