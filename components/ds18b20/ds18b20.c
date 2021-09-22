@@ -296,7 +296,6 @@ float ds18b20_get_temp(void) {
       check=ds18b20_RST_PULSE();
       if(check==1)
       {
-        printf("communication succesfull\n");
         ds18b20_send_byte(0xCC);
         ds18b20_send_byte(0x44);
         vTaskDelay(850 / portTICK_RATE_MS);
@@ -306,7 +305,6 @@ float ds18b20_get_temp(void) {
         temp1=ds18b20_read_byte();
         temp2=ds18b20_read_byte();
         check=ds18b20_RST_PULSE();
-        printf("temp1 = %d and temp2 = %d, check = %d\n", temp1, temp2, check);
         float temp=0;
         temp=(float)(temp1+(temp2*256))/16;
         return temp;
