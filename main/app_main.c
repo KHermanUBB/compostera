@@ -24,6 +24,18 @@
 #include "esp_log.h"
 #include "mqtt_client.h"
 
+#include <hx711.h>
+#include <math.h>
+
+#define PD_SCK_GPIO 18
+#define DOUT_GPIO   19
+
+
+//Variables para ajuste lineal del valor de la pesa
+int32_t peso = 0;       //Salida final
+int32_t gain = -0.1;    //Valor constante 
+int32_t offset = 36908; //Utilizado para tara
+
 static const char *TAG = "MQTT_EXAMPLE";
 
 
@@ -121,6 +133,8 @@ void mainTask(void *pvParameters){
   }
 }
 
+void test(void *pvParameters);
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "[APP] Startup..");
@@ -153,3 +167,54 @@ void app_main(void)
 
 
 
+r
+
+void test(void *pvParameters)
+{
+    hx711_t dev = {
+        .dout = DOUT_GPIO,
+        .pd_sck = PD_SCK_GPIO,
+        .gain = HX711_GAIN_A_64
+    };
+
+    // initialize device
+    while (1)
+    {
+        esp_err_t r = hx711_init(&dev);
+        if (r == ESP_OK)
+            break;
+        printf("Could not initialize HX711: %d (%s)\n", r, esp_err_to_name(r));
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+
+    // read from device
+    while (1)
+    {
+        esp_err_t r = hx711_wait(&dev, 500);
+        if (r != ESP_OK)
+        {
+            printf("Device not found: %d (%s)\n", r, esp_err_to_name(r));
+            continue;
+        }
+
+        int32_t data;
+        r = hx711_read_data(&dev, &data);
+        if (r != ESP_OK)
+        {
+            printf("Could not read data: %d (%s)\n", r, esp_err_to_name(r));
+            continue;
+        }
+
+        
+
+        printf("Dato Crudo: %d\n", data);
+
+
+        /*
+        peso = (data - offset) * gain;
+        Ajuste de valor leido para interpretarlo como peso
+        */
+
+        vTaskDelay(pdMS_TO_TICKS(1500));
+    }
+}
