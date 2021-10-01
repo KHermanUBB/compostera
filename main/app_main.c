@@ -25,10 +25,10 @@
 #include "mqtt_client.h"
 
 #include <lcd.h>
+#include "hx711.h"
 
 
 static const char *TAG = "MQTT_EXAMPLE";
-
 
 esp_mqtt_client_handle_t client;
 
