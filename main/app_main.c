@@ -20,17 +20,58 @@
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
-
 #include "esp_log.h"
 #include "mqtt_client.h"
-
 #include <lcd.h>
 #include "hx711.h"
+#include "main.h"
 
-
-static const char *TAG = "MQTT_EXAMPLE";
-
+static const char *TAG = "Compostera";
 esp_mqtt_client_handle_t client;
+
+
+/*------------------------------- Queues --------------------------------------*/
+xQueueHandle qTemperature;
+xQueueHandle qWeight;
+xQueueHandle qLevel;
+xQueueHandle qLogin;
+/*------------------------------- Queues --------------------------------------*/
+
+void app_main(void)
+{
+    ESP_LOGI(TAG, "[APP] Startup..");
+    ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
+
+    esp_log_level_set("*", ESP_LOG_INFO);
+    esp_log_level_set("Compostera_CLIENT", ESP_LOG_VERBOSE);
+    esp_log_level_set("Compostera_EXAMPLE", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT_TCP", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT_SSL", ESP_LOG_VERBOSE);
+    esp_log_level_set("TRANSPORT", ESP_LOG_VERBOSE);
+    esp_log_level_set("OUTBOX", ESP_LOG_VERBOSE);
+
+    ESP_ERROR_CHECK(nvs_flash_init());
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    qTemperature = xQueueCreate(5, sizeof(float));
+    qWeight      = xQueueCreate(5, sizeof(int32_t));
+    qLevel       = xQueueCreate(5, sizeof(int32_t));
+    qLogin       = xQueueCreate(5, LOGIN_MAX_LEN*sizeof(float));
+
+    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
+     * Read "Establishing Wi-Fi or Ethernet Connection" section in
+     * examples/protocols/README.md for more information about this function.
+     */
+    ESP_ERROR_CHECK(example_connect());
+
+    mqtt_app_start();
+
+    //xTaskCreatePinnedToCore(&mainTask, "mainTask", 2048, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&vReadTemperature,     "DS18B20Task", 2048, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&vPublishDataOverMQTT, "MQTTPublishTask", 2048, NULL, 5, NULL, 0);
+}
 
 static void log_error_if_nonzero(const char * message, int error_code)
 {
@@ -104,7 +145,6 @@ static void mqtt_app_start(void)
 }
 
 
-const int DS_PIN = 23; //GPIO where you connected ds18b20
 
 void mainTask(void *pvParameters){
   
@@ -125,33 +165,39 @@ void mainTask(void *pvParameters){
 }
 
 
-void app_main(void)
-{
-    ESP_LOGI(TAG, "[APP] Startup..");
-    ESP_LOGI(TAG, "[APP] Free memory: %d bytes", esp_get_free_heap_size());
-    ESP_LOGI(TAG, "[APP] IDF version: %s", esp_get_idf_version());
-
-    esp_log_level_set("*", ESP_LOG_INFO);
-    esp_log_level_set("MQTT_CLIENT", ESP_LOG_VERBOSE);
-    esp_log_level_set("MQTT_EXAMPLE", ESP_LOG_VERBOSE);
-    esp_log_level_set("TRANSPORT_TCP", ESP_LOG_VERBOSE);
-    esp_log_level_set("TRANSPORT_SSL", ESP_LOG_VERBOSE);
-    esp_log_level_set("TRANSPORT", ESP_LOG_VERBOSE);
-    esp_log_level_set("OUTBOX", ESP_LOG_VERBOSE);
-
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-     * Read "Establishing Wi-Fi or Ethernet Connection" section in
-     * examples/protocols/README.md for more information about this function.
-     */
-    ESP_ERROR_CHECK(example_connect());
-
-    mqtt_app_start();
-    xTaskCreatePinnedToCore(&mainTask, "mainTask", 2048, NULL, 5, NULL, 0);
+ void vReadTemperature(void *pvParameters){
+  
+  static float temp;
+  uint8_t ok;
+  ds18b20_init(DS_PIN);
+  while (1) {
+    temp = ds18b20_get_temp();
+    ok = xQueueSend(qTemperature, &temp, 5000 / portTICK_PERIOD_MS);
+    if(ok) 
+        ESP_LOGI(TAG, "Temperature  %f send to queue successfully \n", temp);
+    else 
+        ESP_LOGI(TAG, "Temperature  %f failed to send to queue \n", temp);
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
 }
 
+void vPublishDataOverMQTT(void *params)
+{
+ 
+  float temp;
+  int msg_id2;
+  char payload[MAX_PAYLOAD_LENGTH];
+  while (true)
+  { 
+    if(xQueueReceive(qTemperature, &temp , 5000 / portTICK_PERIOD_MS))
+    {
+      sprintf(payload,"%f", temp);
+      msg_id2 = esp_mqtt_client_publish(client, "testkh/topic", payload , 0, 1, 0);
+    //  ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id2);
 
-
+    } else {
+      //ESP_LOGI(TAG, "sent publish failed , msg_id=%d", msg_id2);
+    }
+     vTaskDelay(5000 / portTICK_PERIOD_MS);
+   }
+}
