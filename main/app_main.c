@@ -118,7 +118,7 @@ void mainTask(void *pvParameters){
     temp = ds18b20_get_temp();
     printf("Temperature: %f\n", temp);
     sprintf(payload,"Temp = %f", temp );
-    msg_id = esp_mqtt_client_publish(client, "/topic/qos1", payload , 0, 1, 0);
+    msg_id = esp_mqtt_client_publish(client, "testkh/topic", payload , 0, 1, 0);
     ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
     vTaskDelay(5000 / portTICK_PERIOD_MS);
   }

@@ -142,7 +142,7 @@ CONFIG_EXAMPLE_CONNECT_IPV6_PREF_LOCAL_LINK=y
 #
 # Example Configuration
 #
-CONFIG_BROKER_URL="mqtt://192.168.1.7"
+CONFIG_BROKER_URL="mqtt://18.194.65.151"
 # end of Example Configuration
 
 #
