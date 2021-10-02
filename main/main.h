@@ -11,6 +11,9 @@
 
 
 #define DS_PIN 23
+#define PD_SCK_GPIO 18
+#define DOUT_GPIO   19
+
 
 #define LOGIN_MAX_LEN 4
 #define MAX_PAYLOAD_LENGTH 32
@@ -32,6 +35,7 @@ static void mqtt_app_start(void);
 void mainTask(void *pvParameters);
 void vReadTemperature(void *pvParameters);
 void vPublishDataOverMQTT(void *params);
+void vReadWeight(void *pvParameters);
 
 
 #endif /* KEYPAD_H */
