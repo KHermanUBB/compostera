@@ -187,13 +187,15 @@ void vPublishDataOverMQTT(void *params)
 {
 
     float temp;
+    int weight;
     int msg_id2;
     char payload[MAX_PAYLOAD_LENGTH];
+    
     while (true)
     {
-        if (xQueueReceive(qTemperature, &temp, 5000 / portTICK_PERIOD_MS))
+        if (xQueueReceive(qWeight, &weight, 5000 / portTICK_PERIOD_MS))
         {
-            sprintf(payload, "%f", temp);
+            sprintf(payload, "%d", weight );
             msg_id2 = esp_mqtt_client_publish(client, "testkh/topic", payload, 0, 1, 0);
         }
 
