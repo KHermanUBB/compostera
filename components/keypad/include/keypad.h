@@ -9,8 +9,14 @@
 
 #ifndef KEYPAD_H
 #define KEYPAD_H
-//HOla mundo
-//comentario
+
+#define TAM                     4
+
+void keypad_init();
+char keypad_get_char();
+char *keypad_get_string();
+
+
 
 #endif /* KEYPAD_H */
 

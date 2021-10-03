@@ -1,19 +1,17 @@
-#include <lcd.h>
 #include <driver/i2c.h>
 #include <esp_log.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <stdio.h>
 #include "sdkconfig.h"
-//#include "rom/ets_sys.h"
 #include "esp32/rom/ets_sys.h"
 #include <esp_log.h>
 #include <string.h>
+#include "LCD.h"
 
+//static char tag[] = "LCD Driver";
 
-static char tag[] = "LCD Driver";
-
-static esp_err_t I2C_init(void)
+esp_err_t I2C_init(void)
 {
     i2c_config_t conf = {
         .mode = I2C_MODE_MASTER,
@@ -30,6 +28,7 @@ static esp_err_t I2C_init(void)
 
 void LCD_init()
 {
+
     I2C_init();
     vTaskDelay(100 / portTICK_RATE_MS);                                 // Initial 40 mSec delay
 
@@ -61,7 +60,7 @@ void LCD_init()
 void LCD_setCursor(uint8_t col, uint8_t row)
 {
     if (row > LCD_rows - 1) {
-        ESP_LOGE(tag, "Cannot write to row %d. Please select a row in the range (0, %d)", row, LCD_rows-1);
+        //ESP_LOGE(tag, "Cannot write to row %d. Please select a row in the range (0, %d)", row, LCD_rows-1);
         row = LCD_rows - 1;
     }
     uint8_t row_offsets[] = {LCD_LINEONE, LCD_LINETWO, LCD_LINETHREE, LCD_LINEFOUR};
@@ -92,6 +91,14 @@ void LCD_clearScreen(void)
     vTaskDelay(2 / portTICK_RATE_MS);                                   // This command takes a while to complete
 }
 
+void LCD_Plot(char arr[], int col, int row){
+    vTaskDelay(2/portTICK_RATE_MS);
+    LCD_setCursor(col,row);
+    LCD_writeStr(arr);
+    LCD_setCursor(0,0);
+    vTaskDelay(5/portTICK_RATE_MS);
+}
+
 static void LCD_writeNibble(uint8_t nibble, uint8_t mode)
 {
     uint8_t data = (nibble & 0xF0) | mode | LCD_BACKLIGHT;
@@ -106,13 +113,13 @@ static void LCD_writeNibble(uint8_t nibble, uint8_t mode)
     LCD_pulseEnable(data);                                              // Clock data into LCD
 }
 
-static void LCD_writeByte(uint8_t data, uint8_t mode)
+void LCD_writeByte(uint8_t data, uint8_t mode)
 {
     LCD_writeNibble(data & 0xF0, mode);
     LCD_writeNibble((data << 4) & 0xF0, mode);
 }
 
-static void LCD_pulseEnable(uint8_t data)
+void LCD_pulseEnable(uint8_t data)
 {
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
     ESP_ERROR_CHECK(i2c_master_start(cmd));
@@ -131,19 +138,4 @@ static void LCD_pulseEnable(uint8_t data)
     ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS));
     i2c_cmd_link_delete(cmd);
     ets_delay_us(500);
-}
-
-void insertarSubcadena(char *original, char *subcadena, int indice) {
-    // El inicio es copiar la original N caracteres definidos por posición
-    char inicio[MAXIMA_LONGITUD] = "";
-    strncpy(inicio, original, indice);
-    // El final es copiar desde la posición N caracteres definidos por los sobrantes
-    char fin[MAXIMA_LONGITUD] = "";
-    strncpy(fin, original + indice, strlen(original) - indice);
-    // Agregar la subcadena al inicio
-    strcat(inicio, subcadena);
-    // Y agregar el fin a la anterior cadena, es decir, al inicio
-    strcat(inicio, fin);
-    // Copiarla dentro de la cadena recibida
-    strcpy(original, inicio);
 }

@@ -37,29 +37,25 @@
 #define LCD_SET_CURSOR          0x40        // set cursor position
 
 #define MAXIMA_LONGITUD         100
+#define LCD_addr                0x27
+#define SDA_pin                 21
+#define SCL_pin                 22
+#define LCD_cols                16
+#define LCD_rows                2
+#define TAMU                    6
 
 
-#define LCD_addr  0x27
-#define SDA_pin   21
-#define SCL_pin   19
-#define LCD_cols  16
-#define LCD_rows 2
-
-// Pin mappings
-// P0 -> RS
-// P1 -> RW
-// P2 -> E
-// P3 -> Backlight
-// P4 -> D4
-// P5 -> D5
-// P6 -> D6
-// P7 -> D7
-
-
+static esp_err_t I2C_init(void);
 static void LCD_writeNibble(uint8_t nibble, uint8_t mode);
 static void LCD_writeByte(uint8_t data, uint8_t mode);
 static void LCD_pulseEnable(uint8_t nibble);
 void LCD_init();
+void LCD_setCursor(uint8_t col, uint8_t row);
+void LCD_writeChar(char c);
+void LCD_writeStr(char* str);
+void LCD_home(void);
+void LCD_clearScreen(void);
+void LCD_Plot(char arr[], int col, int row);
 
 
 
