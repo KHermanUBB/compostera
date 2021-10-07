@@ -10,10 +10,12 @@
 #include "keypad.h"
 #include <stdlib.h>
 
+int pines_filas[TAM] = {25,26,27,16};
+int pines_columnas[TAM] = {17,5,18,19};
+
 
 void keypad_init(){
-  int pines_filas[TAM] = {25,26,27,16};
-  int pines_columnas[TAM] = {17,5,18,19};
+
   // row to -> output 
   //cols -> input
   for(int i = 0;i<TAM;i++){
@@ -26,8 +28,6 @@ void keypad_init(){
 }
 
 char keypad_get_char(){
-  int pines_filas[TAM] = {25,26,27,16};
-  int pines_columnas[TAM] = {17,5,18,19};
   char k = 'n';
   char teclas[TAM][TAM] = {{'1','2','3','A'}, 
                      {'4','5','6','B'}, 
